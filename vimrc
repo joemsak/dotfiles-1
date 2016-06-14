@@ -43,6 +43,10 @@ Plugin 'scrooloose/syntastic'       " Syntax highlighter
 " Colors
 Plugin 'nanotech/jellybeans.vim'
 
+if filereadable($HOME . "/.plugins.local")
+  source ~/.plugins.local
+endif
+
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -52,7 +56,6 @@ colorscheme jellybeans
 
 syntax on                 " Enable syntax highlighting
 
-set shell=zsh
 set backspace=indent,eol,start " allow backspacing over everything in insert mode
 set mouse=""
 set history=500		" keep 500 lines of command line history
@@ -95,7 +98,6 @@ runtime macros/matchit.vim
 
 "============= SYNTASTIC
 set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
 
 let g:syntastic_always_populate_loc_list = 1
