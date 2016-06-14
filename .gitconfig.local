@@ -1,0 +1,48 @@
+[alias]
+  co = checkout
+  br = branch
+  ci = commit
+  st = status
+
+  l = "!source ~/.githelpers && pretty_git_log"
+  la = !git l --all
+  r = !git l -30
+  ra = !git r --all
+
+[user]
+  name = Joe Sak
+  email = joe@joesak.com
+
+[core]
+  editor = vim
+
+[color]
+  branch = auto
+  diff = auto
+  interactive = auto
+  status = auto
+
+[merge]
+  tool = opendiff
+
+[branch "master"]
+  rebase = true
+
+[branch]
+  autosetuprebase = always
+
+[mergetool]
+  keepBackup = false
+
+[push]
+  default = simple
+
+[credential]
+  helper = osxkeychain
+
+[rerere]
+  enabled = true
+
+[diff]
+  compactionHeuristic = true
+  highlight = true

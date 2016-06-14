@@ -1,0 +1,128 @@
+" Tab completion
+" will insert tab at beginning of line,
+" will use completion if not at beginning
+set wildmode=list:longest,list:full
+function! InsertTabWrapper()
+    let col = col('.') - 1
+    if !col || getline('.')[col - 1] !~ '\k'
+        return "\<tab>"
+    else
+        return "\<c-p>"
+    endif
+endfunction
+inoremap <Tab> <c-r>=InsertTabWrapper()<cr>
+inoremap <S-Tab> <c-n>
+
+" Set paste / nopaste / no highlight
+map <Leader>p :set paste<cr>o
+map <Leader>P :set nopaste<cr>
+map <Leader>h :noh<cr>
+
+" Easily open and reload vimrc
+"<Leader>v brings up my .vimrc
+"<Leader>V reloads it -- making all changes active (have to save first)
+map <Leader>v :sp $HOME/.vimrc.local<CR>
+map <silent> <Leader>V :source $HOME/.vimrc<CR>:if has("gui")<CR>:source $HOME/.vimrc<CR>:endif<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
+
+" Command-T
+let g:CommandTMaxFiles=80085
+noremap <C-t> :CommandTFlush<CR>:CommandT<CR>
+:set wildignore+=*.o,*.obj,bower_components/**,node_modules/**,tmp/**
+
+" RunTests
+function! RunTests(filename)
+    " Write the file and run tests for the given filename
+     if filereadable(@%)
+       :wa
+     else
+       :w
+     endif
+    :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
+    :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
+    :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
+    :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
+    :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
+    :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
+    if match(a:filename, '\.feature$') != -1
+        exec ":!script/features " . a:filename
+    else
+        if filereadable("script/test")
+            exec ":!script/test " . a:filename
+        elseif filereadable("Gemfile")
+          if match(a:filename, '_test.rb') != -1
+            exec ":!ruby -Ilib:test " . a:filename
+          elseif match(a:filename, '_spec.rb') != -1
+            exec ":!bundle exec rspec --color " . a:filename
+          elseif match(a:filename, '_spec.js') != -1
+            exec ":!bundle exec rake konacha:run SPEC=" . a:filename
+          end
+        elseif match(a:filename, '_tests') != -1
+            exec ":!nosetests --rednose " . a:filename
+        elseif match(a:filename, '_test.clj') != -1
+            exec ":!lein difftest " . a:filename
+        elseif match(a:filename, '_test.exs') != -1
+            exec ":!elixir " . a:filename
+        elseif match(a:filename, 'Test') != -1
+            exec ":!javac " . a:filename . ".java && java " . a:filename
+        else
+            exec ":!rspec --color " . a:filename
+        end
+    end
+endfunction
+
+function! SetTestFile()
+    " Set the spec file that tests will be run for.
+    let t:jms_test_file=@%
+endfunction
+
+function! RunTestFile(...)
+    if a:0
+        let command_suffix = a:1
+    else
+        let command_suffix = ""
+    endif
+
+    " Run the tests for the previously-marked file.
+    let in_spec_file = match(expand("%"), '\(.feature\|_spec.rb\)$') != -1
+    let in_test_file = match(expand("%"), '\(.feature\|_test.\w\+\)$') != -1
+    let in_py_file   = match(expand("%"), '\(.feature\|_tests.py\)$') != -1
+    let in_js_file   = match(expand("%"), '\(.feature\|_spec.js\)$') != -1
+    let in_coffee_file = match(expand("%"), '\(.feature\|Spec.coffee\)$') != -1
+    if in_test_file || in_spec_file || in_py_file || in_js_file || in_coffee_file
+        call SetTestFile()
+    elseif !exists("t:jms_test_file")
+        return
+    end
+    call RunTests(t:jms_test_file . command_suffix)
+endfunction
+
+function! RunNearestTest()
+    let spec_line_number = line('.')
+    call RunTestFile(":" . spec_line_number . " -b")
+endfunction
+
+map <leader>t :call RunTestFile()<cr>
+map <leader>T :call RunNearestTest()<cr>
+map <leader>a :call RunTests('')<cr>
+map <leader>c :w\|:!script/features<cr>
+map <leader>w :w\|:!script/features --profile wip<cr>
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" COLOR
+" """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+:set t_Co=256 " 256 colors
+:set background=dark
+:color grb256
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" PROMOTE VARIABLE TO RSPEC LET
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! PromoteToLet()
+  :normal! dd
+  " :exec '?^\s*it\>'
+  :normal! P
+  :.s/\(\w\+\) = \(.*\)$/let(:\1) { \2 }/
+  :normal ==
+endfunction
+:command! PromoteToLet :call PromoteToLet()
+:map <leader>pl :PromoteToLet<cr>

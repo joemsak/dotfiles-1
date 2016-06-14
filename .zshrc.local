@@ -1,0 +1,4 @@
+export PATH=$HOME/.cabal/bin:$PATH
+export PATH="$HOME/Library/Haskell/bin:$PATH"
+eval "$(docker-machine env default)"
+eval $(thefuck --alias)
