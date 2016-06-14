@@ -27,3 +27,7 @@ export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/9.4/include
 
 # for npm
 export PKG_CONFIG_PATH=/opt/X11/lib/pkgconfig
+
+[[ -f ~/.aliases ]] && source ~/.aliases
+
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
